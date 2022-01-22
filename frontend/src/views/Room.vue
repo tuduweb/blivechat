@@ -100,6 +100,7 @@ export default {
         }
       }
       this.chatClient.onAddText = this.onAddText
+      this.chatClient.onWelcome = this.onWelcome
       this.chatClient.onAddGift = this.onAddGift
       this.chatClient.onAddMember = this.onAddMember
       this.chatClient.onAddSuperChat = this.onAddSuperChat
@@ -130,6 +131,19 @@ export default {
         privilegeType: data.privilegeType,
         repeated: 1,
         translation: data.translation
+      }
+      this.$refs.renderer.addMessage(message)
+    },
+    onWelcome(data) {
+      window.console.log(data)
+      let message = {
+        id: data.id,
+        content: 'welcome ' + data.uname,
+        time: new Date(data.timestamp * 1000),
+        authorName: data.uname,
+        avatarUrl: data.avatarUrl,
+        repeated: 1,
+        type: constants.MESSAGE_TYPE_TEXT,
       }
       this.$refs.renderer.addMessage(message)
     },

@@ -47,6 +47,7 @@ export default class ChatClientDirect {
       {host: "broadcastlv.chat.bilibili.com", port: 2243, wss_port: 443, ws_port: 2244}
     ]
 
+    this.onWelcome = null
     this.onAddText = null
     this.onAddGift = null
     this.onAddMember = null
@@ -186,6 +187,7 @@ export default class ChatClientDirect {
   handlerMessage (data) {
     let offset = 0
     while (offset < data.byteLength) {
+      window.console.log(data.buffer, data.byteLength, offset)
       let dataView = new DataView(data.buffer, offset)
       let packLen = dataView.getUint32(0)
       // let rawHeaderSize = dataView.getUint16(4)
@@ -242,6 +244,7 @@ export default class ChatClientDirect {
     if (pos != -1) {
       cmd = cmd.substr(0, pos)
     }
+    window.console.log(command, cmd)
     let handler = COMMAND_HANDLERS[cmd]
     if (handler) {
       handler.call(this, command)
@@ -361,12 +364,42 @@ export default class ChatClientDirect {
     }
     this.onDelSuperChat({ids})
   }
+
+  async onWelcome (command) {
+    if(!this.onWelcome) {
+      window.console.warn('onWelcome not implement')
+      return
+    }
+    window.console.log(command)
+
+    let data = command.data
+    window.console.log(data)
+  
+    let uname = data.uname
+    //let uid = data.uid
+
+    window.console.log('欢迎[%s]进入直播间', uname)
+
+    let message = {
+      id: getUuid4Hex(),
+      uname: uname,
+      uid: data["uid"],
+      avatarUrl: await avatar.getAvatarUrl(data.uid)
+    }
+
+    this.onWelcome(message)
+  }
+
 }
+
+
 
 const COMMAND_HANDLERS = {
   DANMU_MSG: ChatClientDirect.prototype.onReceiveDanmaku,
   SEND_GIFT: ChatClientDirect.prototype.onReceiveGift,
   GUARD_BUY: ChatClientDirect.prototype.onBuyGuard,
   SUPER_CHAT_MESSAGE: ChatClientDirect.prototype.onSuperChat,
-  SUPER_CHAT_MESSAGE_DELETE: ChatClientDirect.prototype.onSuperChatDelete
+  SUPER_CHAT_MESSAGE_DELETE: ChatClientDirect.prototype.onSuperChatDelete,
+  WELCOME: ChatClientDirect.prototype.onWelcome,
+  INTERACT_WORD: ChatClientDirect.prototype.onWelcome
 }
