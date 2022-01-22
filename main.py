@@ -23,6 +23,13 @@ BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 WEB_ROOT = os.path.join(BASE_PATH, 'frontend', 'dist')
 LOG_FILE_NAME = os.path.join(BASE_PATH, 'log', 'blivechat.log')
 
+# fix tornado error: add_reader raise NotImplementedError
+# windows 系统下 tornado 使用 使用 SelectorEventLoop
+import platform
+if platform.system() == "Windows":
+    import asyncio
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 routes = [
     (r'/api/server_info', api.main.ServerInfoHandler),
     (r'/api/chat', api.chat.ChatHandler),
